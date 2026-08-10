@@ -66,38 +66,6 @@ jobs:
             exit "$build_status"
           fi
 
-      - name: Capture simulator visuals
-        continue-on-error: true
-        timeout-minutes: 8
-        run: |
-          set -euo pipefail
-          app_path="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name 'QingJian.app' -type d -print -quit)"
-          test -n "$app_path"
-          mkdir -p build/visuals
-          device_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone 17 \(/ {print $2; exit}')"
-          test -n "$device_id"
-          trap 'xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true' EXIT
-          xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true
-          xcrun simctl erase "$device_id"
-          xcrun simctl boot "$device_id" >/dev/null 2>&1 || true
-          xcrun simctl bootstatus "$device_id" -b
-          xcrun simctl install "$device_id" "$app_path"
-          xcrun simctl launch "$device_id" com.qingjian.app
-          sleep 4
-          xcrun simctl io "$device_id" screenshot build/visuals/01-onboarding.png
-          xcrun simctl terminate "$device_id" com.qingjian.app || true
-          xcrun simctl spawn "$device_id" defaults write com.qingjian.app hasCompletedOnboarding -bool YES
-          xcrun simctl launch "$device_id" com.qingjian.app
-          sleep 4
-          xcrun simctl io "$device_id" screenshot build/visuals/02-today.png
-          xcrun simctl terminate "$device_id" com.qingjian.app || true
-          xcrun simctl launch "$device_id" com.qingjian.app
-          xcrun simctl io "$device_id" recordVideo --codec=h264 --force build/visuals/qingjian-launch.mp4 &
-          video_pid=$!
-          sleep 12
-          kill "$video_pid" || true
-          wait "$video_pid" || true
-
       - name: Run XCTest on iOS Simulator
         run: |
           set -o pipefail
@@ -134,6 +102,39 @@ jobs:
             done
             exit "$test_status"
           fi
+
+      - name: Capture simulator visuals
+        if: ${{ success() }}
+        continue-on-error: true
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          app_path="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name 'QingJian.app' -type d -print -quit)"
+          test -n "$app_path"
+          mkdir -p build/visuals
+          device_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone 17 \(/ {print $2; exit}')"
+          test -n "$device_id"
+          trap 'xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true' EXIT
+          xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true
+          xcrun simctl erase "$device_id"
+          xcrun simctl boot "$device_id" >/dev/null 2>&1 || true
+          xcrun simctl bootstatus "$device_id" -b
+          xcrun simctl install "$device_id" "$app_path"
+          xcrun simctl launch "$device_id" com.qingjian.app
+          sleep 4
+          xcrun simctl io "$device_id" screenshot build/visuals/01-onboarding.png
+          xcrun simctl terminate "$device_id" com.qingjian.app || true
+          xcrun simctl spawn "$device_id" defaults write com.qingjian.app hasCompletedOnboarding -bool YES
+          xcrun simctl launch "$device_id" com.qingjian.app
+          sleep 4
+          xcrun simctl io "$device_id" screenshot build/visuals/02-today.png
+          xcrun simctl terminate "$device_id" com.qingjian.app || true
+          xcrun simctl launch "$device_id" com.qingjian.app
+          xcrun simctl io "$device_id" recordVideo --codec=h264 --force build/visuals/qingjian-launch.mp4 &
+          video_pid=$!
+          sleep 12
+          kill "$video_pid" || true
+          wait "$video_pid" || true
 
       - name: Upload XCTest results
         if: ${{ always() }}
