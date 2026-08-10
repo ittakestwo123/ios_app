@@ -66,6 +66,8 @@ jobs:
           fi
 
       - name: Capture simulator visuals
+        continue-on-error: true
+        timeout-minutes: 8
         run: |
           set -euo pipefail
           app_path="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name 'QingJian.app' -type d -print -quit)"
