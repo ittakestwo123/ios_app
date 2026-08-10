@@ -48,8 +48,8 @@ final class FocusTimerEngine: ObservableObject {
     private let store: ActiveTimerStoring
     private let now: () -> Date
 
-    init(store: ActiveTimerStoring = UserDefaultsActiveTimerStore(), now: @escaping () -> Date = Date.init) {
-        self.store = store
+    init(store: ActiveTimerStoring? = nil, now: @escaping () -> Date = Date.init) {
+        self.store = store ?? UserDefaultsActiveTimerStore()
         self.now = now
     }
 
