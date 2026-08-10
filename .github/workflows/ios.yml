@@ -31,6 +31,7 @@ jobs:
       - name: Build for iOS Simulator
         run: |
           mkdir -p build
+          set -o pipefail
           xcodebuild \
             -project QingJian.xcodeproj \
             -scheme QingJian \
@@ -38,10 +39,20 @@ jobs:
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -derivedDataPath build/DerivedData \
-            -resultBundlePath build/QingJian-build.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            build
+            build 2>&1 | tee build/xcodebuild-build.log
+          build_status=${PIPESTATUS[0]}
+          if [ "$build_status" -ne 0 ]; then
+            echo "::error title=xcodebuild::Build failed with exit code $build_status"
+            tail -n 30 build/xcodebuild-build.log | while IFS= read -r line; do
+              line="${line//'%'/'%25'}"
+              line="${line//$'\r'/'%0D'}"
+              line="${line//$'\n'/'%0A'}"
+              echo "::error title=xcodebuild::$line"
+            done
+            exit "$build_status"
+          fi
 
       - name: Run XCTest on iOS Simulator
         run: |
@@ -62,5 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: qingjian-xcresults
-          path: build/*.xcresult
+          path: |
+            build/*.xcresult
+            build/*.log
           if-no-files-found: warn
