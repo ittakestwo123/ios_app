@@ -1,6 +1,8 @@
 import SwiftData
 import XCTest
 
+@testable import QingJian
+
 @MainActor
 final class PersistenceControllerTests: XCTestCase {
     func testSchemaContainsAllPhaseOneModels() throws {
