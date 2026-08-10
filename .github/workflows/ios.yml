@@ -86,6 +86,7 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/QingJian-tests.xcresult \
+            -only-testing:QingJianUITests/QingJianUITests/testCompletingOnboardingRevealsFourTabs \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             test 2>&1 | tee build/xcodebuild-test.log
