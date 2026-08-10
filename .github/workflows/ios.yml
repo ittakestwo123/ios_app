@@ -66,6 +66,14 @@ jobs:
             exit "$build_status"
           fi
 
+      - name: Reset XCTest simulator data
+        run: |
+          set -euo pipefail
+          device_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone 17 \(/ {print $2; exit}')"
+          test -n "$device_id"
+          xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true
+          xcrun simctl erase "$device_id"
+
       - name: Run XCTest on iOS Simulator
         run: |
           set -o pipefail
@@ -85,7 +93,7 @@ jobs:
           set -e
           if [ "$test_status" -ne 0 ]; then
             echo "::error title=xcodebuild::Tests failed with exit code $test_status"
-            test_lines=$(grep -iE "(error:|failed|failing tests|test case|xctassert|executed [0-9]+ test|xcuitest|ui testing|idetestoperations|assertion|testing failed|test suite)" build/xcodebuild-test.log | tail -n 200 || true)
+            test_lines=$(grep -iE "(error:|failed|failing tests|test case|xctassert|executed [0-9]+ test|xcuitest|ui testing|idetestoperations|assertion|testing failed|test suite|coredata|swiftdata|fatal|crash|launch|terminated|application|qingjian)" build/xcodebuild-test.log | tail -n 250 || true)
             if [ -n "$test_lines" ]; then
               while IFS= read -r line; do
                 line="${line//'%'/'%25'}"
