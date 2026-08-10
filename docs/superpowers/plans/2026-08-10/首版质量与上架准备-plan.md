@@ -4,7 +4,7 @@
 
 **Goal:** 为 QingJian 首版补上真实 UI 烟测和 Apple 隐私清单，使 Onboarding 到四 Tab 的关键入口可在 CI 中回归，并完善 App Store 基础合规材料。
 
-**Architecture:** UI 测试使用独立 `QingJianUITests` target，通过受控的 `-uiTestingResetState` 启动参数清理测试专用 UserDefaults；生产逻辑不改变正常启动路径。隐私清单作为 App target 的资源加入工程，声明仅使用本地 UserDefaults 和 SwiftData，不声明收集或跟踪数据。
+**Architecture:** UI 测试使用独立 `QingJianUITests` target，通过受控的 `-uiTestingResetState` 启动参数清理测试专用 UserDefaults，并切换到内存 SwiftData 容器，避免 UI 回归受模拟器磁盘状态影响；生产逻辑不改变正常启动路径。隐私清单作为 App target 的资源加入工程，声明仅使用本地 UserDefaults 和 SwiftData，不声明收集或跟踪数据。
 
 **Tech Stack:** SwiftUI, XCTest/XCUITest, SwiftData, Xcode 26, iOS 17 deployment target。
 
@@ -52,16 +52,18 @@ Run the workflow after adding the test source and target wiring. Before the targ
 
 - [ ] **Step 3: Add a test-only state reset at app launch**
 
-At the top of `QingJianApp.init`, before `AppSettings` is read, add:
+At the top of `QingJianApp.init`, before `AppSettings` is read, derive the test flag, clear UserDefaults, and pass the same flag to the container factory:
 
 ```swift
-if ProcessInfo.processInfo.arguments.contains("-uiTestingResetState"),
-   let bundleIdentifier = Bundle.main.bundleIdentifier {
+let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTestingResetState")
+if isUITesting, let bundleIdentifier = Bundle.main.bundleIdentifier {
     UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
 }
+
+container = try PersistenceController.makeContainer(inMemory: isUITesting)
 ```
 
-The condition is inert for App Store builds and ordinary launches.
+The condition is inert for App Store builds and ordinary launches; ordinary launches continue to use the on-disk SwiftData container.
 
 - [ ] **Step 4: Wire the UI test target and scheme**
 

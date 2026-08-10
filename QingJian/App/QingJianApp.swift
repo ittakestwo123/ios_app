@@ -8,8 +8,8 @@ struct QingJianApp: App {
     @StateObject private var timerEngine: FocusTimerEngine
 
     init() {
-        if ProcessInfo.processInfo.arguments.contains("-uiTestingResetState"),
-           let bundleIdentifier = Bundle.main.bundleIdentifier {
+        let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTestingResetState")
+        if isUITesting, let bundleIdentifier = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
         }
 
@@ -17,7 +17,7 @@ struct QingJianApp: App {
         _timerEngine = StateObject(wrappedValue: FocusTimerEngine())
 
         do {
-            container = try PersistenceController.makeContainer()
+            container = try PersistenceController.makeContainer(inMemory: isUITesting)
         } catch {
             fatalError("无法创建本地学习记录：\(error.localizedDescription)")
         }
