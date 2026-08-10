@@ -32,6 +32,7 @@ jobs:
         run: |
           mkdir -p build
           set -o pipefail
+          set +e
           xcodebuild \
             -project QingJian.xcodeproj \
             -scheme QingJian \
@@ -43,6 +44,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build 2>&1 | tee build/xcodebuild-build.log
           build_status=${PIPESTATUS[0]}
+          set -e
           if [ "$build_status" -ne 0 ]; then
             echo "::error title=xcodebuild::Build failed with exit code $build_status"
             tail -n 30 build/xcodebuild-build.log | while IFS= read -r line; do
