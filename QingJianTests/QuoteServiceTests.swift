@@ -26,8 +26,8 @@ final class QuoteServiceTests: XCTestCase {
 
     func testRandomQuoteCanExcludeRecentlyShownIDs() {
         let quotes = [
-            Quote(id: "a", text: "鐢?, attribution: "鏅寸鍘熷垱", category: .selfEncouragement, sourceType: .original),
-            Quote(id: "b", text: "涔?, attribution: "鏅寸鍘熷垱", category: .selfEncouragement, sourceType: .original)
+            Quote(id: "a", text: "甲", attribution: "晴笺原创", category: .selfEncouragement, sourceType: .original),
+            Quote(id: "b", text: "乙", attribution: "晴笺原创", category: .selfEncouragement, sourceType: .original)
         ]
         let service = QuoteService(quotes: quotes, calendar: TestDates.calendar)
 
