@@ -67,6 +67,8 @@ jobs:
 
       - name: Run XCTest on iOS Simulator
         run: |
+          set -o pipefail
+          set +e
           xcodebuild \
             -project QingJian.xcodeproj \
             -scheme QingJian \
@@ -77,7 +79,28 @@ jobs:
             -resultBundlePath build/QingJian-tests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            test
+            test 2>&1 | tee build/xcodebuild-test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if [ "$test_status" -ne 0 ]; then
+            echo "::error title=xcodebuild::Tests failed with exit code $test_status"
+            test_lines=$(grep -E "(error:|failed|Failing tests|Test Case|XCTAssert|Executed [0-9]+ test)" build/xcodebuild-test.log | tail -n 120 || true)
+            if [ -n "$test_lines" ]; then
+              while IFS= read -r line; do
+                line="${line//'%'/'%25'}"
+                line="${line//$'\r'/'%0D'}"
+                line="${line//$'\n'/'%0A'}"
+                echo "::error title=xcodebuild::$line"
+              done <<< "$test_lines"
+            fi
+            tail -n 80 build/xcodebuild-test.log | while IFS= read -r line; do
+              line="${line//'%'/'%25'}"
+              line="${line//$'\r'/'%0D'}"
+              line="${line//$'\n'/'%0A'}"
+              echo "::error title=xcodebuild::$line"
+            done
+            exit "$test_status"
+          fi
 
       - name: Upload XCTest results
         if: ${{ always() }}
