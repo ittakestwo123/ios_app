@@ -1,0 +1,66 @@
+name: QingJian iOS CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qingjian-ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test with Xcode 26
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app
+          xcodebuild -version
+          xcrun simctl list runtimes
+
+      - name: Build for iOS Simulator
+        run: |
+          mkdir -p build
+          xcodebuild \
+            -project QingJian.xcodeproj \
+            -scheme QingJian \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=26.0' \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/QingJian-build.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            clean build
+
+      - name: Run XCTest on iOS Simulator
+        run: |
+          xcodebuild \
+            -project QingJian.xcodeproj \
+            -scheme QingJian \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=26.0' \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/QingJian-tests.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            test
+
+      - name: Upload XCTest results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: qingjian-xcresults
+          path: build/*.xcresult
+          if-no-files-found: warn
