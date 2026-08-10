@@ -26,7 +26,7 @@ Add a `Capture simulator visuals` step that:
           app_path="$(find build/DerivedData/Build/Products/Debug-iphonesimulator -maxdepth 1 -name 'QingJian.app' -type d -print -quit)"
           test -n "$app_path"
           mkdir -p build/visuals
-          device_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone 17 \\(/ {print $2; exit}')"
+          device_id="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone 17 \(/ {print $2; exit}')"
           test -n "$device_id"
           trap 'xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true' EXIT
           xcrun simctl shutdown "$device_id" >/dev/null 2>&1 || true
