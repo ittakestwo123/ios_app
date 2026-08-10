@@ -30,9 +30,9 @@ struct TodayView: View {
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: .now)
         switch hour {
-        case 5..<12: "早上好"
-        case 12..<18: "下午好"
-        default: "晚上好"
+        case 5..<12: return "早上好"
+        case 12..<18: return "下午好"
+        default: return "晚上好"
         }
     }
 
