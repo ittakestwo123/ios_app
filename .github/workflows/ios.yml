@@ -36,12 +36,12 @@ jobs:
             -scheme QingJian \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=26.0' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/QingJian-build.xcresult \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            clean build
+            build
 
       - name: Run XCTest on iOS Simulator
         run: |
@@ -50,7 +50,7 @@ jobs:
             -scheme QingJian \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=26.0' \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/QingJian-tests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
