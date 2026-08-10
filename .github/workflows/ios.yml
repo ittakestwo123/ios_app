@@ -47,6 +47,15 @@ jobs:
           set -e
           if [ "$build_status" -ne 0 ]; then
             echo "::error title=xcodebuild::Build failed with exit code $build_status"
+            error_lines=$(grep -E "error:|fatal error:" build/xcodebuild-build.log || true)
+            if [ -n "$error_lines" ]; then
+              while IFS= read -r line; do
+                line="${line//'%'/'%25'}"
+                line="${line//$'\r'/'%0D'}"
+                line="${line//$'\n'/'%0A'}"
+                echo "::error title=xcodebuild::$line"
+              done <<< "$error_lines"
+            fi
             tail -n 30 build/xcodebuild-build.log | while IFS= read -r line; do
               line="${line//'%'/'%25'}"
               line="${line//$'\r'/'%0D'}"
