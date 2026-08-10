@@ -15,7 +15,6 @@
 - 本地提醒、倒计时结束提醒、完成页、每日达标和 7/30/100 天里程碑（同一自然日只触发一次）。
 - Dynamic Type、深色模式、Reduce Motion、主要按钮/进度/日历状态的基础无障碍标签与值。
 - 9 组 XCTest 源文件，覆盖日期切分、跨年/跨月统计、streak、目标变化、计时暂停恢复/重启、语录、梅枝成长阈值、设置持久化、SwiftData 容器与科目清理。
-- `QingJianUITests` UI 烟测：从干净状态完成 Onboarding，并断言 Today/Focus/Journey/Quotes 四个 Tab 可见。
 - App Icon 资源、隐私政策静态页、素材归属说明和 Xcode 运行 README。
 - `PrivacyInfo.xcprivacy`：声明无跟踪、无收集数据，并登记本地 UserDefaults 的使用原因。
 

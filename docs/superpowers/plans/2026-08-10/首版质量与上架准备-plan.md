@@ -4,74 +4,19 @@
 
 **Goal:** 为 QingJian 首版补上真实 UI 烟测和 Apple 隐私清单，使 Onboarding 到四 Tab 的关键入口可在 CI 中回归，并完善 App Store 基础合规材料。
 
-**Architecture:** UI 测试使用独立 `QingJianUITests` target，通过受控的 `-uiTestingResetState` 启动参数清理测试专用 UserDefaults，并切换到内存 SwiftData 容器，避免 UI 回归受模拟器磁盘状态影响；生产逻辑不改变正常启动路径。隐私清单作为 App target 的资源加入工程，声明仅使用本地 UserDefaults 和 SwiftData，不声明收集或跟踪数据。
+**Architecture:** 首版质量验证沿用稳定的 XCTest target，并使用 CI 的 Onboarding/Today 模拟器截图作为视觉 smoke；由于 Xcode 26 无 Team 的云端 UI-test 注入需要签名配置，首版不加入独立 XCUITest target，避免测试工程反而阻塞核心 build/test。隐私清单作为 App target 的资源加入工程，声明仅使用本地 UserDefaults 和 SwiftData，不声明收集或跟踪数据。
 
 **Tech Stack:** SwiftUI, XCTest/XCUITest, SwiftData, Xcode 26, iOS 17 deployment target。
 
 ---
 
-### Task 1: Add onboarding-to-tabs UI regression test
+### Task 1: Add onboarding-to-tabs UI regression test (deferred)
 
-**Files:**
-- Create: `QingJianUITests/QingJianUITests.swift`
-- Modify: `QingJian/App/QingJianApp.swift`
-- Modify: `QingJian.xcodeproj/project.pbxproj`
-- Modify: `QingJian.xcodeproj/xcshareddata/xcschemes/QingJian.xcscheme`
+**Decision:** Deferred for a future signed CI configuration. The current workflow still captures onboarding and Today screenshots after the app build, while the stable unit XCTest target remains the required gate.
 
-- [ ] **Step 1: Write the failing UI test**
+- [x] **Decision: defer the independent XCUITest target**
 
-The test launches with a test-only reset flag, completes the existing onboarding buttons, and asserts all four localized tab labels:
-
-```swift
-import XCTest
-
-final class QingJianUITests: XCTestCase {
-    func testCompletingOnboardingRevealsFourTabs() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTestingResetState"]
-        app.launch()
-
-        XCTAssertTrue(app.staticTexts["晴笺"].waitForExistence(timeout: 5))
-        app.buttons["继续"].tap()
-        XCTAssertTrue(app.buttons["完成"].waitForExistence(timeout: 5))
-        app.buttons["完成"].tap()
-
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 5))
-        XCTAssertTrue(tabBar.buttons["今日"].exists)
-        XCTAssertTrue(tabBar.buttons["专注"].exists)
-        XCTAssertTrue(tabBar.buttons["足迹"].exists)
-        XCTAssertTrue(tabBar.buttons["拾光"].exists)
-    }
-}
-```
-
-- [ ] **Step 2: Run the new target in cloud CI and confirm the missing-target failure**
-
-Run the workflow after adding the test source and target wiring. Before the target wiring is present, Xcode must report the source is not part of a target; after wiring, any failure must be an actual UI assertion or compile error rather than a missing test file.
-
-- [ ] **Step 3: Add a test-only state reset at app launch**
-
-At the top of `QingJianApp.init`, before `AppSettings` is read, derive the test flag, clear UserDefaults, and pass the same flag to the container factory:
-
-```swift
-let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTestingResetState")
-if isUITesting, let bundleIdentifier = Bundle.main.bundleIdentifier {
-    UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
-}
-
-container = try PersistenceController.makeContainer(inMemory: isUITesting)
-```
-
-The condition is inert for App Store builds and ordinary launches; ordinary launches continue to use the on-disk SwiftData container.
-
-- [ ] **Step 4: Wire the UI test target and scheme**
-
-Add a `com.apple.product-type.bundle.ui-testing` target with bundle identifier `com.qingjian.uitests`, deployment target 17.0, `TEST_TARGET_NAME = QingJian`, a source phase containing `QingJianUITests.swift`, and a shared-scheme `TestableReference` for this target.
-
-- [ ] **Step 5: Run the UI test and all existing XCTest tests**
-
-Run in GitHub Actions on the configured iPhone 17 simulator. Expected result: build succeeds, the UI smoke test passes, and all existing unit tests remain green.
+The target was prototyped and tested in GitHub Actions. Xcode 26 attempted to inject signed XCTest/Testing frameworks into the unsigned simulator app and exited 65 without an available Apple Team. The target was removed to keep the required build/test gate stable. The existing XCTest suite and post-build onboarding/Today screenshots remain active; a signed macOS CI setup can add this test later without changing product code.
 
 ### Task 2: Add App Store privacy manifest
 
