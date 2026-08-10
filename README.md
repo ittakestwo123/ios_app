@@ -55,7 +55,7 @@ xcodebuild -scheme QingJian -destination 'platform=iOS Simulator,name=iPhone 16 
 
 ## GitHub Actions 云端构建
 
-`.github/workflows/ios.yml` 使用 GitHub 的 `macos-26` Runner 和 Xcode 26.6，自动执行 iOS Simulator build 与 XCTest，并将 `.xcresult` 上传为构建产物。它按 `iPhone 16 Pro` 设备名选择镜像中可用的 iOS 26 模拟器，避免固定小版本号造成匹配失败。将本目录推送到 GitHub 后，`push`、Pull Request 或手动运行 `QingJian iOS CI` 即可触发。
+`.github/workflows/ios.yml` 使用 GitHub 的 `macos-26` Runner 和 Xcode 26.6，自动执行 iOS Simulator build 与 XCTest，并将 `.xcresult` 上传为构建产物。它按 `iPhone 17` 设备名选择镜像中可用的 iOS 26 模拟器，避免固定小版本号造成匹配失败。将本目录推送到 GitHub 后，`push`、Pull Request 或手动运行 `QingJian iOS CI` 即可触发。
 
 该工作流仅用于模拟器编译和测试，不需要签名；生成 IPA、TestFlight 或 App Store 上传需要另行配置 Apple Developer 证书、Provisioning Profile 或 App Store Connect API Key，并通过 GitHub Secrets 注入。
 

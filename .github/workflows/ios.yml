@@ -38,7 +38,7 @@ jobs:
             -scheme QingJian \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
@@ -63,7 +63,7 @@ jobs:
             -scheme QingJian \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/QingJian-tests.xcresult \
             CODE_SIGNING_ALLOWED=NO \
