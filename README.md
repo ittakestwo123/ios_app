@@ -28,6 +28,7 @@ QingJian/
   Features/            Onboarding、Today、Focus、Journey、Quotes、Settings
   Resources/           quotes.json 与离线梅竹资源
 QingJianTests/         日期、统计、计时与语录单元测试
+QingJianUITests/       Onboarding 完成后四 Tab 出现的 UI 烟测
 ```
 
 ## 在 Xcode 26 中运行
@@ -55,7 +56,7 @@ xcodebuild -scheme QingJian -destination 'platform=iOS Simulator,name=iPhone 16 
 
 ## GitHub Actions 云端构建
 
-`.github/workflows/ios.yml` 使用 GitHub 的 `macos-26` Runner 和 Xcode 26.6，自动执行 iOS Simulator build 与 XCTest，并将 `.xcresult` 上传为构建产物。它按 `iPhone 17` 设备名选择镜像中可用的 iOS 26 模拟器，避免固定小版本号造成匹配失败。将本目录推送到 GitHub 后，`push`、Pull Request 或手动运行 `QingJian iOS CI` 即可触发。
+`.github/workflows/ios.yml` 使用 GitHub 的 `macos-26` Runner 和 Xcode 26.6，自动执行 iOS Simulator build、XCTest/XCUITest，并将 `.xcresult`、日志、Onboarding/Today 截图和短视频上传为构建产物。它按 `iPhone 17` 设备名选择镜像中可用的 iOS 26 模拟器，避免固定小版本号造成匹配失败。将本目录推送到 GitHub 后，`push`、Pull Request 或手动运行 `QingJian iOS CI` 即可触发。
 
 该工作流仅用于模拟器编译和测试，不需要签名；生成 IPA、TestFlight 或 App Store 上传需要另行配置 Apple Developer 证书、Provisioning Profile 或 App Store Connect API Key，并通过 GitHub Secrets 注入。
 
@@ -63,7 +64,7 @@ xcodebuild -scheme QingJian -destination 'platform=iOS Simulator,name=iPhone 16 
 
 ## 隐私
 
-晴笺不注册账户，也不收集邮箱、手机号、定位、联系人、照片、健康数据、广告标识符或使用行为。学习数据只保存在设备本地；通知仅在用户主动开启后由 iOS 本地调度。详细文本见 [PRIVACY.md](PRIVACY.md)。
+晴笺不注册账户，也不收集邮箱、手机号、定位、联系人、照片、健康数据、广告标识符或使用行为。学习数据只保存在设备本地；通知仅在用户主动开启后由 iOS 本地调度。App 内 [PrivacyInfo.xcprivacy](QingJian/Resources/PrivacyInfo.xcprivacy) 声明没有跟踪或收集数据，并登记 UserDefaults 仅用于保存本地设置。详细文本见 [PRIVACY.md](PRIVACY.md)。
 
 ## 部署隐私政策网页
 

@@ -4,10 +4,18 @@ import SwiftUI
 @main
 struct QingJianApp: App {
     private let container: ModelContainer
-    @StateObject private var settings = AppSettings()
-    @StateObject private var timerEngine = FocusTimerEngine()
+    @StateObject private var settings: AppSettings
+    @StateObject private var timerEngine: FocusTimerEngine
 
     init() {
+        if ProcessInfo.processInfo.arguments.contains("-uiTestingResetState"),
+           let bundleIdentifier = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
+        }
+
+        _settings = StateObject(wrappedValue: AppSettings())
+        _timerEngine = StateObject(wrappedValue: FocusTimerEngine())
+
         do {
             container = try PersistenceController.makeContainer()
         } catch {
