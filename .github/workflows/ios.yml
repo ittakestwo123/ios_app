@@ -87,6 +87,9 @@ jobs:
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/QingJian-tests.xcresult \
             -only-testing:QingJianUITests/QingJianUITests/testCompletingOnboardingRevealsFourTabs \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_REQUIRED=NO \
             test 2>&1 | tee build/xcodebuild-test.log
           test_status=${PIPESTATUS[0]}
           set -e
