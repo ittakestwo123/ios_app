@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: qingjian-ios-${{ github.workflow }}-${{ github.ref }}
+  # A hung simulator process must not block verification for a later commit.
+  group: qingjian-ios-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
